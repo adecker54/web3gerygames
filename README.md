@@ -1,1 +1,3 @@
-# web3gerygames
+Hungarian: Web3 keretrendszer a Geryt támogató játékokhoz. Geminivel közösen tervezve. Alapötlet, követelményjegyzék és instrukciók az enyémek, Tervezés Gemini által a korrekcióimmal és jóváhagyásommal. A kódolást a Gemini végezte és én teszteltem. A játékok igen egyszerűek, a klasszikusok. Lényeg, hogy be tudjak szedni egy kis GERY-t a token LP tárcájába.
+
+English: A Web3 framework for Geryt-supported games. Designed in collaboration with Gemini. The core concept, requirements list, and instructions are mine; the design was done by Gemini, with my revisions and approval. Gemini handled the coding, and I tested it. The games are very simple - classical ones. The main thing is that I can add some GERY to my token's LP wallet.
