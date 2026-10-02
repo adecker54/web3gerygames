@@ -7,6 +7,7 @@ import { AuthManager } from './auth.js';
 import { PointsManager } from './points.js';
 import { SoundManager } from './sound.js';
 import { GamesManager } from './games.js';
+import { WalletManager } from './wallet.js';
 
 export class App {
     constructor() {
@@ -24,6 +25,9 @@ export class App {
         this.state = window.GeryApp.state;
         this.modules = window.GeryApp.modules;
         
+        // Wallet modul regisztrálása a modulok közé
+        this.modules.wallet = new WalletManager();
+
         // Képernyők referenciái
         this.screens = {
             intro: document.getElementById('screen-intro'),
@@ -49,13 +53,13 @@ export class App {
         this.setupAdminScreen();
         this.setupFixedButtons();
 
-        // Nyelvi eseményfigyelő (Bővítve az aktív játék szövegeinek frissítésével is)
+        // Nyelvi eseményfigyelő (Frissíti a menüt, ha ott vagyunk)
         this.modules.language.onChange(() => {
             this.updateScreenTexts();
             this.modules.language.applyToDOM();
-            this.refreshActiveGameText();
-            // HA a főmenüben vagyunk, frissítjük a játékok kártyáit is az új nyelvre
-            if (this.currentScreen === 'menu') {
+            
+            const menuScreen = document.getElementById('screen-menu');
+            if (menuScreen && menuScreen.style.display !== 'none' && this.modules.games) {
                 this.modules.games.renderMenu();
             }
         });
@@ -64,7 +68,7 @@ export class App {
         await this.showScreen('intro');
         
         this.initialized = true;
-        console.log('✅ App inicializálva');
+        console.log('✅ App inicializálva (Web3 integrációval)');
     }
 
     async showScreen(screenName, data = null) {
@@ -100,7 +104,6 @@ export class App {
             this.state.isCodeValid = false;
             this.state.userCode = null;
             
-            // Biztosítjuk, hogy új indításkor a mentés jelző is 0-zódjon / resetelödjön
             if (this.modules.points) {
                 this.modules.points.hasSavedCurrentSession = false;
             }
@@ -110,6 +113,7 @@ export class App {
                 pointsLabel.textContent = '0';
             }
             this.initIntroVideo();
+            this.resetIntroUI();
         }
         
         this.updateScreenTexts();
@@ -126,53 +130,66 @@ export class App {
         this.videoElement = screen.querySelector('.background-video');
         this.backgroundImage = screen.querySelector('.background-image');
 
-        const supportBtn = screen.querySelector('.support-btn');
+        const supportBtn = screen.querySelector('.support-btn'); // Ebből csináljuk a Web3 Connect / Pay gombot
         const codeInput = screen.querySelector('.code-input');
         const continueBtn = screen.querySelector('.continue-btn');
         const errorMsg = screen.querySelector('.error-msg');
 
-        supportBtn.addEventListener('click', () => {
-            this.modules.sound.playClick();
-            if (this.state.isCodeValid) {
-                this.showScreen('menu');
-                return;
-            }
-            codeInput.disabled = false;
-            codeInput.focus();
-            supportBtn.classList.add('active');
-        });
+        // Ha van dedikált input mező, átalakítjuk / elrejtjük, vagy Web3 státusz kijelzővé tesszük
+        if (codeInput) {
+            codeInput.placeholder = "Connect Wallet first...";
+            codeInput.readOnly = true; // Nem gépelünk be kódot, a tárca adja a címet
+        }
 
-        codeInput.addEventListener('input', () => {
-            const code = codeInput.value.toUpperCase().trim();
-            codeInput.value = code.replace(/[^A-Z0-9]/g, '');
+        // Kattintás a Web3 folyamat elindítására
+        supportBtn.addEventListener('click', async () => {
+            this.modules.sound.playClick();
             
-            if (code.length === 6) {
-                this.validateCode(code, codeInput, errorMsg, continueBtn, supportBtn);
-            } else {
+            try {
                 errorMsg.textContent = '';
-                codeInput.classList.remove('error');
-                continueBtn.classList.remove('visible');
+                errorMsg.style.display = 'none';
+
+                // 1. LÉPÉS: Ha még nincs csatlakoztatva a tárca
+                if (!this.modules.wallet.walletAddress) {
+                    supportBtn.textContent = "Connecting Wallet...";
+                    const address = await this.modules.wallet.connectWallet();
+                    
+                    // Megjelenítjük a csatlakoztatott tárcát rövidítve
+                    const shortAddr = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+                    if (codeInput) codeInput.value = shortAddr;
+                    
+                    this.state.userCode = address; // A tárca címét használjuk azonosítóként
+                    supportBtn.textContent = "Pay Entry Fee (tBNB)";
+                    supportBtn.classList.add('active');
+                } 
+                // 2. LÉPÉS: Ha már csatlakozott, akkor jön a befizetés
+                else {
+                    supportBtn.textContent = "Processing Payment...";
+                    supportBtn.disabled = true;
+                    
+                    await this.modules.wallet.payEntranceFee();
+                    
+                    // Ha sikeres a tranzakció:
+                    this.state.isCodeValid = true;
+                    supportBtn.textContent = "Success! Entering...";
+                    
+                    setTimeout(() => {
+                        this.showScreen('menu');
+                    }, 1000);
+                }
+            } catch (err) {
+                console.error(err);
+                errorMsg.textContent = err.message || "Hiba történt a művelet során!";
+                errorMsg.style.display = 'block';
+                supportBtn.textContent = this.modules.wallet.walletAddress ? "Pay Entry Fee (tBNB)" : "Connect Wallet";
+                supportBtn.disabled = false;
             }
         });
 
-        codeInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const code = codeInput.value.toUpperCase().trim();
-                if (code.length === 6) {
-                    this.validateCode(code, codeInput, errorMsg, continueBtn, supportBtn);
-                }
-                if (this.state.isCodeValid) {
-                    this.showScreen('menu');
-                }
-            }
-        });
-
-        continueBtn.addEventListener('click', () => {
-            this.modules.sound.playClick();
-            if (this.state.isCodeValid) {
-                this.showScreen('menu');
-            }
-        });
+        // A sima continue gombot elrejthetjük vagy összevonhatjuk a supportBtn-nel
+        if (continueBtn) {
+            continueBtn.style.display = 'none'; 
+        }
 
         if (this.videoElement) {
             this.videoElement.addEventListener('ended', () => {
@@ -186,6 +203,21 @@ export class App {
         }
 
         this.introElements = { supportBtn, codeInput, continueBtn, errorMsg };
+    }
+
+    resetIntroUI() {
+        if (this.introElements && this.introElements.supportBtn) {
+            this.introElements.supportBtn.textContent = "Connect Wallet";
+            this.introElements.supportBtn.classList.remove('active');
+            this.introElements.supportBtn.disabled = false;
+        }
+        if (this.introElements && this.introElements.codeInput) {
+            this.introElements.codeInput.value = '';
+        }
+        if (this.introElements && this.introElements.errorMsg) {
+            this.introElements.errorMsg.textContent = '';
+            this.introElements.errorMsg.style.display = 'none';
+        }
     }
 
     setupMenuScreen() {
@@ -401,48 +433,6 @@ export class App {
                 icon.textContent = this.state.soundEnabled ? '🔊' : '🔇';
             }
         }
-        
-        const codeInput = document.querySelector('.code-input');
-        if (codeInput) {
-            codeInput.placeholder = this.modules.language?.t('enter_code') || 'Add meg a kódszámodat';
-        }
-        
-        const errorMsg = document.querySelector('.error-msg');
-        if (errorMsg && errorMsg.textContent.trim() !== '') {
-            errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
-        }
-    }
-
-    // Új segédfüggvény: Ha épp játékban vagyunk, frissíti a játék belső szövegeit is nyelvváltáskor
-    refreshActiveGameText() {
-        if (this.currentScreen === 'game' && this.state.currentGame) {
-            const gameModule = this.modules[`game${this.state.currentGame}`];
-            if (gameModule && typeof gameModule.refreshTexts === 'function') {
-                gameModule.refreshTexts();
-            }
-        }
-    }
-
-    validateCode(code, input, errorMsg, continueBtn, supportBtn) {
-        const isValid = this.modules.points.validateCode(code);
-    
-        if (isValid) {
-            this.state.userCode = code;
-            this.state.isCodeValid = true;
-            this.state.sessionPoints = 0;
-            this.state.gameScores = [0, 0, 0, 0, 0, 0];
-        
-            input.classList.remove('error');
-            errorMsg.textContent = '';
-            errorMsg.style.display = 'none';
-            continueBtn.classList.add('visible');
-            supportBtn.classList.remove('active');
-        } else {
-            input.classList.add('error');
-            errorMsg.textContent = this.modules.language?.t('invalid_code') || 'Nem jó a kódszám';
-            errorMsg.style.display = 'block';
-            continueBtn.classList.remove('visible');
-        }
     }
 
     initIntroVideo() {
@@ -506,7 +496,7 @@ export class App {
             pointsDisplay.textContent = this.state.sessionPoints || 0;
         }
         if (codeDisplay) {
-            codeDisplay.textContent = this.state.userCode || '----';
+            codeDisplay.textContent = this.state.userCode ? `${this.state.userCode.substring(0, 6)}...` : '----';
         }
         if (dateDisplay) {
             const now = new Date();
