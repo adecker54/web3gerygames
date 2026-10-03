@@ -350,21 +350,26 @@ export class Game6 {
     }
 
     finish() {
-        if (!this.isRunning && !this.gameOver) return;
-
+        // Ha már nem futott és nincs vége sem, ne csináljon semmit
+        // (A || helyett &&-re érdemes figyelni: ha fut VAGY vége van, akkor lezárhatjuk)
         this.isRunning = false;
         this.clearLoop();
         window.removeEventListener('keydown', this._onKey);
 
-        const gamesManager = window.GeryApp?.modules?.games;
-        if (gamesManager) {
-            gamesManager.recordGameResult(this.gameId, this.score);
+        const earnedPoints = this.score || 0;
+
+        // Meghívjuk a fő app finishGame metódusát, ami mindenhol máshol is működik
+        if (window.GeryApp && typeof window.GeryApp.finishGame === 'function') {
+            window.GeryApp.finishGame(earnedPoints);
         } else {
-            const app = window.GeryApp?.modules?.app;
-            if (app) app.showScreen('menu');
+            // Biztonsági fallback, ha esetleg globálisan így érik el
+            const app = window.GeryApp;
+            if (app && typeof app.showScreen === 'function') {
+                app.showScreen('menu');
+            }
         }
 
-        console.log(`🏁 Játék 6 befejezve: ${this.score} pont`);
+        console.log(`🏁 Játék befejezve: ${earnedPoints} pont`);
     }
 
     reset() {
