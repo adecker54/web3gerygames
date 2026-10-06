@@ -356,7 +356,8 @@ export class Game6 {
         this.clearLoop();
         window.removeEventListener('keydown', this._onKey);
 
-        const earnedPoints = this.score || 0;
+        // Biztosítjuk, hogy a score szám legyen (ha 0, akkor is átadjuk)
+        const earnedPoints = (this.score !== undefined && this.score !== null) ? this.score : 0;
 
         // Meghívjuk a fő app finishGame metódusát, ami mindenhol máshol is működik
         if (window.GeryApp && typeof window.GeryApp.finishGame === 'function') {

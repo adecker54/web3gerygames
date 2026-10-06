@@ -24,7 +24,7 @@ export class App {
         // Hivatkozások a globális állapotra
         this.state = window.GeryApp.state;
         this.modules = window.GeryApp.modules;
-        
+        window.GeryApp.app = this; // <--- EZ A LÉNYEG: Így a játékok is elérik a fő appot!
         // Wallet modul regisztrálása a modulok közé
         this.modules.wallet = new WalletManager();
 
