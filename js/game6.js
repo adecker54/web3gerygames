@@ -356,21 +356,26 @@ export class Game6 {
         this.clearLoop();
         window.removeEventListener('keydown', this._onKey);
 
-        // Biztosítjuk, hogy a score szám legyen (ha 0, akkor is átadjuk)
-        const earnedPoints = (this.score !== undefined && this.score !== null) ? this.score : 0;
-
-        // Meghívjuk a fő app finishGame metódusát, ami mindenhol máshol is működik
-        if (window.GeryApp && typeof window.GeryApp.finishGame === 'function') {
-            window.GeryApp.finishGame(earnedPoints);
+        // 2. Kényszerítjük a fő App-ot, hogy vigyen vissza a menübe, bármi történjék is
+        // Megkeressük a fő App példányt közvetlenül a DOM-ból vagy globális helyről
+        const appInstance = window.GeryApp?.app || window.GeryApp?.modules?.app;
+        if (appInstance && typeof appInstance.showScreen === 'function') {
+            appInstance.showScreen('menu');
         } else {
-            // Biztonsági fallback, ha esetleg globálisan így érik el
-            const app = window.GeryApp;
-            if (app && typeof app.showScreen === 'function') {
-                app.showScreen('menu');
+            // Végső fallback: ha semmi más nincs, közvetlenül a főmenü képernyőt váltjuk DOM-ból
+            const menuScreen = document.getElementById('screen-menu');
+            const gameScreen = document.getElementById('screen-game');
+            if (menuScreen && gameScreen) {
+                gameScreen.style.display = 'none';
+                gameScreen.classList.remove('active', 'fade-in');
+                menuScreen.style.display = 'flex';
+                menuScreen.classList.add('active', 'fade-in');
+                if (gamesManager && typeof gamesManager.renderMenu === 'function') {
+                    gamesManager.renderMenu();
+                }
             }
         }
-
-        console.log(`🏁 Játék befejezve: ${earnedPoints} pont`);
+        console.log(`🏁 Játék 6 befejezve és lezárva: ${earnedPoints} pont`);
     }
 
     reset() {
