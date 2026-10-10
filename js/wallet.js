@@ -66,15 +66,20 @@ export class WalletManager {
         }
     }
 
-    // Díj befizetése: tBNB küldése a kassza tárcába (pl. 0.001 tBNB tesztként)
-    async payEntranceFee() {
+    // Díj befizetése: tBNB küldése a kassza tárcába a megadott összeggel
+    async payEntranceFee(customAmountStr) {
         if (!this.signer) {
             throw new Error("Nincs csatlakoztatott tárca!");
         }
 
-        // Teszt jelleggel küldünk egy minimális tBNB-t (pl. 0.0005 tBNB vagy tetszőleges összeg)
-        // Később itt majd a Gery token contract transfer() metódusát hívjuk meg!
-        const feeAmount = ethers.parseEther("0.0005"); 
+        // Konvertáljuk a megadott értéket számmá
+        const amount = parseFloat(customAmountStr);
+        if (isNaN(amount) || amount < 0.005) {
+            throw new Error("A minimális összeg 0.005 tBNB!");
+        }
+
+        // Átváltás Wei-be ethers-rel
+        const feeAmount = ethers.parseEther(amount.toString()); 
 
         const tx = await this.signer.sendTransaction({
             to: this.adminAddress,
@@ -83,7 +88,7 @@ export class WalletManager {
 
         console.log(`⏳ Tranzakció elküldve: ${tx.hash}`);
         
-        // Várjuk meg, amíg a blokklánc megerősíti a tranzakciót
+        // Várjuk meg a blokklánc megerősítést
         const receipt = await tx.wait();
         console.log(`✅ Tranzakció megerősítve a blokkon: ${receipt.blockNumber}`);
         

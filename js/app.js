@@ -137,10 +137,13 @@ export class App {
 
         // Ha van dedikált input mező, átalakítjuk / elrejtjük, vagy Web3 státusz kijelzővé tesszük
         if (codeInput) {
-            codeInput.placeholder = "Connect Wallet first...";
-            codeInput.readOnly = true; // Nem gépelünk be kódot, a tárca adja a címet
+            codeInput.placeholder = "Min. 0.005 tBNB";
+            codeInput.readOnly = false; // Mostmár szabadon beírhatja a játékos az összeget
+            codeInput.type = "number";
+            codeInput.step = "0.001";
+            codeInput.min = "0.005";
+            codeInput.value = "0.005"; // Alapértelmezett ajánlott érték
         }
-
         // Kattintás a Web3 folyamat elindítására
         supportBtn.addEventListener('click', async () => {
             this.modules.sound.playClick();
@@ -149,27 +152,27 @@ export class App {
                 errorMsg.textContent = '';
                 errorMsg.style.display = 'none';
 
-                // 1. LÉPÉS: Ha még nincs csatlakoztatva a tárca
+                // 1. LÉPÉS: Tárca csatlakoztatása, ha még nem tette meg
                 if (!this.modules.wallet.walletAddress) {
                     supportBtn.textContent = "Connecting Wallet...";
                     const address = await this.modules.wallet.connectWallet();
                     
-                    // Megjelenítjük a csatlakoztatott tárcát rövidítve
                     const shortAddr = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-                    if (codeInput) codeInput.value = shortAddr;
+                    console.log(`Játékos tárcája csatlakoztatva: ${address}`);
                     
-                    this.state.userCode = address; // A tárca címét használjuk azonosítóként
-                    supportBtn.textContent = "Pay Entry Fee (tBNB)";
+                    this.state.userCode = address; 
+                    supportBtn.textContent = "Pay & Enter";
                     supportBtn.classList.add('active');
                 } 
-                // 2. LÉPÉS: Ha már csatlakozott, akkor jön a befizetés
+                // 2. LÉPÉS: Fizetés a megadott összeggel
                 else {
-                    supportBtn.textContent = "Processing Payment...";
+                    const enteredAmount = codeInput ? codeInput.value : "0.005";
+                    
+                    supportBtn.textContent = `Sending ${enteredAmount} tBNB...`;
                     supportBtn.disabled = true;
                     
-                    await this.modules.wallet.payEntranceFee();
+                    await this.modules.wallet.payEntranceFee(enteredAmount);
                     
-                    // Ha sikeres a tranzakció:
                     this.state.isCodeValid = true;
                     supportBtn.textContent = "Success! Entering...";
                     
@@ -181,12 +184,12 @@ export class App {
                 console.error(err);
                 errorMsg.textContent = err.message || "Hiba történt a művelet során!";
                 errorMsg.style.display = 'block';
-                supportBtn.textContent = this.modules.wallet.walletAddress ? "Pay Entry Fee (tBNB)" : "Connect Wallet";
+                supportBtn.textContent = this.modules.wallet.walletAddress ? "Pay & Enter" : "Connect Wallet";
                 supportBtn.disabled = false;
             }
         });
-
-        // A sima continue gombot elrejthetjük vagy összevonhatjuk a supportBtn-nel
+ 
+       // A sima continue gombot elrejthetjük vagy összevonhatjuk a supportBtn-nel
         if (continueBtn) {
             continueBtn.style.display = 'none'; 
         }
