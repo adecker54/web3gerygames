@@ -350,32 +350,49 @@ export class Game6 {
     }
 
     finish() {
-        // Ha már nem futott és nincs vége sem, ne csináljon semmit
-        // (A || helyett &&-re érdemes figyelni: ha fut VAGY vége van, akkor lezárhatjuk)
-        this.isRunning = false;
-        this.clearLoop();
-        window.removeEventListener('keydown', this._onKey);
+        try {
+            // Leállítjuk a játékot és a figyelőket
+            this.isRunning = false;
+            this.clearLoop();
+            window.removeEventListener('keydown', this._onKey);
 
-        // 2. Kényszerítjük a fő App-ot, hogy vigyen vissza a menübe, bármi történjék is
-        // Megkeressük a fő App példányt közvetlenül a DOM-ból vagy globális helyről
-        const appInstance = window.GeryApp?.app || window.GeryApp?.modules?.app;
-        if (appInstance && typeof appInstance.showScreen === 'function') {
-            appInstance.showScreen('menu');
-        } else {
-            // Végső fallback: ha semmi más nincs, közvetlenül a főmenü képernyőt váltjuk DOM-ból
+            // Biztosítjuk, hogy a pont szám legyen (0 esetén is)
+            const earnedPoints = (this.score !== undefined && this.score !== null) ? Number(this.score) : 0;
+
+            // 1. Megpróbáljuk a gamesManageren keresztül rögzíteni
+            const gamesManager = window.GeryApp?.modules?.games;
+            if (gamesManager && typeof gamesManager.recordGameResult === 'function') {
+                gamesManager.recordGameResult(this.gameId, earnedPoints);
+            } else {
+                // 2. Ha nincs gamesManager, próbáljuk a fő appot
+                const app = window.GeryApp?.app || window.GeryApp?.modules?.app;
+                if (app && typeof app.showScreen === 'function') {
+                    app.showScreen('menu');
+                } else {
+                    // 3. Vészhelyzeti DOM fallback, hogy a gomb mindig működjön
+                    const menuScreen = document.getElementById('screen-menu');
+                    const gameScreen = document.getElementById('screen-game');
+                    if (menuScreen && gameScreen) {
+                        gameScreen.style.display = 'none';
+                        gameScreen.classList.remove('active', 'fade-in');
+                        menuScreen.style.display = 'flex';
+                        menuScreen.classList.add('active', 'fade-in');
+                    }
+                }
+            }
+
+            console.log(`🏁 Játék sikeresen lezárva: ${earnedPoints} pont`);
+        } catch (err) {
+            console.error("Hiba a játék lezárásakor, de megmentjük a menübe lépést:", err);
+            
+            // Ha bármi váratlan hiba történne, akkor is kényszerítjük a menüt, hogy a gomb ne "haljon meg"
             const menuScreen = document.getElementById('screen-menu');
             const gameScreen = document.getElementById('screen-game');
             if (menuScreen && gameScreen) {
                 gameScreen.style.display = 'none';
-                gameScreen.classList.remove('active', 'fade-in');
                 menuScreen.style.display = 'flex';
-                menuScreen.classList.add('active', 'fade-in');
-                if (gamesManager && typeof gamesManager.renderMenu === 'function') {
-                    gamesManager.renderMenu();
-                }
             }
         }
-        console.log(`🏁 Játék 6 befejezve és lezárva: ${earnedPoints} pont`);
     }
 
     reset() {
