@@ -123,58 +123,77 @@ export class App {
     }
 
     // ---------- KÉPERNYŐK BEÁLLÍTÁSA ----------
-    setupIntroScreen() {
+setupIntroScreen() {
         const screen = this.screens.intro;
         if (!screen) return;
 
         this.videoElement = screen.querySelector('.background-video');
         this.backgroundImage = screen.querySelector('.background-image');
 
-        const supportBtn = screen.querySelector('.support-btn'); // Ebből csináljuk a Web3 Connect / Pay gombot
-        const codeInput = screen.querySelector('.code-input');
+        const supportBtn = screen.querySelector('.support-btn'); // Web3 Connect / Pay gomb
+        const codeInput = screen.querySelector('.code-input');     // Összeg beviteli mező
         const continueBtn = screen.querySelector('.continue-btn');
         const errorMsg = screen.querySelector('.error-msg');
 
-        // Ha van dedikált input mező, átalakítjuk / elrejtjük, vagy Web3 státusz kijelzővé tesszük
+        const lang = this.modules.language;
+
+        // 1. Beviteli mező engedélyezése az összeg megadásához
         if (codeInput) {
-            codeInput.placeholder = "Min. 0.005 tBNB";
-            codeInput.readOnly = false; // Mostmár szabadon beírhatja a játékos az összeget
+            codeInput.placeholder = "0.005";
+            codeInput.readOnly = false;
+            codeInput.disabled = false;
             codeInput.type = "number";
             codeInput.step = "0.001";
             codeInput.min = "0.005";
-            codeInput.value = "0.005"; // Alapértelmezett ajánlott érték
+            if (!codeInput.value) {
+                codeInput.value = "0.005"; // Alapértelmezett minimum összeg
+            }
         }
-        // Kattintás a Web3 folyamat elindítására
+
+        // Gomb alapértelmezett felirata nyelvtámogatással
+        if (supportBtn) {
+            supportBtn.textContent = lang?.t('connect_wallet') || 'Tárca csatlakozása & Fizetés';
+        }
+
+        // Kattintás a Web3 folyamatra
         supportBtn.addEventListener('click', async () => {
             this.modules.sound.playClick();
             
             try {
-                errorMsg.textContent = '';
-                errorMsg.style.display = 'none';
+                if (errorMsg) {
+                    errorMsg.textContent = '';
+                    errorMsg.style.display = 'none';
+                }
 
-                // 1. LÉPÉS: Tárca csatlakoztatása, ha még nem tette meg
+                // Ellenőrizzük a beírt összeget előre
+                const amountStr = codeInput ? codeInput.value : "0.005";
+                const amount = parseFloat(amountStr);
+                
+                if (isNaN(amount) || amount < 0.005) {
+                    const minErrText = lang?.t('min_amount_error') || 'A minimális összeg 0.005 tBNB!';
+                    throw new Error(minErrText);
+                }
+
+                // 1. LÉPÉS: Ha még nincs csatlakoztatva a tárca, csatlakozunk
                 if (!this.modules.wallet.walletAddress) {
-                    supportBtn.textContent = "Connecting Wallet...";
+                    supportBtn.textContent = lang?.t('connecting_wallet') || 'Tárca csatlakozása...';
                     const address = await this.modules.wallet.connectWallet();
                     
-                    const shortAddr = `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
                     console.log(`Játékos tárcája csatlakoztatva: ${address}`);
-                    
                     this.state.userCode = address; 
-                    supportBtn.textContent = "Pay & Enter";
+                    
+                    supportBtn.textContent = lang?.t('pay_and_enter') || 'Fizetés és Indítás';
                     supportBtn.classList.add('active');
                 } 
-                // 2. LÉPÉS: Fizetés a megadott összeggel
+                // 2. LÉPÉS: Ha már csatlakozott, végrehajtjuk a tranzakciót a megadott összeggel
                 else {
-                    const enteredAmount = codeInput ? codeInput.value : "0.005";
-                    
-                    supportBtn.textContent = `Sending ${enteredAmount} tBNB...`;
+                    supportBtn.textContent = lang?.t('processing_payment') || 'Tranzakció folyamatban...';
                     supportBtn.disabled = true;
                     
-                    await this.modules.wallet.payEntranceFee(enteredAmount);
+                    await this.modules.wallet.payEntranceFee(amountStr);
                     
                     this.state.isCodeValid = true;
-                    supportBtn.textContent = "Success! Entering...";
+                    supportBtn.textContent = lang?.t('success_entering') || 'Siker! Belépés...';
                     
                     setTimeout(() => {
                         this.showScreen('menu');
@@ -182,14 +201,17 @@ export class App {
                 }
             } catch (err) {
                 console.error(err);
-                errorMsg.textContent = err.message || "Hiba történt a művelet során!";
-                errorMsg.style.display = 'block';
-                supportBtn.textContent = this.modules.wallet.walletAddress ? "Pay & Enter" : "Connect Wallet";
+                if (errorMsg) {
+                    errorMsg.textContent = err.message || (lang?.t('wallet_error') || 'Hiba történt a művelet során!');
+                    errorMsg.style.display = 'block';
+                }
+                supportBtn.textContent = this.modules.wallet.walletAddress ? 
+                    (lang?.t('pay_and_enter') || 'Fizetés és Indítás') : 
+                    (lang?.t('connect_wallet') || 'Tárca csatlakozása & Fizetés');
                 supportBtn.disabled = false;
             }
         });
- 
-       // A sima continue gombot elrejthetjük vagy összevonhatjuk a supportBtn-nel
+
         if (continueBtn) {
             continueBtn.style.display = 'none'; 
         }
