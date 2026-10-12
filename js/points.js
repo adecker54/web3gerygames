@@ -26,6 +26,19 @@ export class PointsManager {
         }
     }
 
+    // Segédfüggvény a tárcacím vagy kód rövidítésére: első 4 ... utolsó 4 karakter
+    formatWalletAddress(address) {
+        if (!address) return '';
+        const trimmed = address.trim();
+        if (trimmed.length > 10 && trimmed.startsWith('0x')) {
+            return `${trimmed.substring(0, 6)}...${trimmed.substring(trimmed.length - 4)}`;
+        }
+        if (trimmed.length > 8) {
+            return `${trimmed.substring(0, 4)}...${trimmed.substring(trimmed.length - 4)}`;
+        }
+        return trimmed;
+    }
+
     async loadCodes() {
         try {
             const response = await fetch('data/codes.txt');
@@ -84,8 +97,8 @@ export class PointsManager {
         
         const headerLine = lines[0];
         const hasHeader = headerLine.toLowerCase().includes('code') || 
-                          headerLine.toLowerCase().includes('points') ||
-                          headerLine.toLowerCase().includes('timestamp');
+                        headerLine.toLowerCase().includes('points') ||
+                        headerLine.toLowerCase().includes('timestamp');
         
         const startIndex = hasHeader ? 1 : 0;
         const result = [];
@@ -94,7 +107,7 @@ export class PointsManager {
             const parts = lines[i].split(',').map(s => s.trim());
             if (parts.length >= 3) {
                 result.push({
-                    code: parts[0].toUpperCase(),
+                    code: parts[0], // Nem teszünk upperCase-t, mert a tárcacímek kis-nagybetű érzékenyek lehetnek (checksum)
                     points: parseInt(parts[1]) || 0,
                     timestamp: parts[2] || ''
                 });
@@ -112,11 +125,22 @@ export class PointsManager {
     }
 
     validateCode(code) {
+        // Ha Web3 tárcacím (0x-sel kezdődik), azt automatikusan érvényesnek tekintjük
+        if (code && code.startsWith('0x')) {
+            this.currentCode = code;
+            this.hasSavedCurrentSession = false;
+            if (window.GeryApp) {
+                window.GeryApp.state.userCode = code;
+                window.GeryApp.state.isCodeValid = true;
+            }
+            return true;
+        }
+
         const upperCode = code.toUpperCase().trim();
         const isValid = this.codes.has(upperCode);
         if (isValid) {
             this.currentCode = upperCode;
-            this.hasSavedCurrentSession = false; // Új kód/session esetén engedélyezzük a mentést
+            this.hasSavedCurrentSession = false;
             if (window.GeryApp) {
                 window.GeryApp.state.userCode = upperCode;
                 window.GeryApp.state.isCodeValid = true;
@@ -128,40 +152,39 @@ export class PointsManager {
     async savePoints(code, points) {
         if (!code) return false;
 
-        const upperCode = code.toUpperCase().trim();
+        const recordCode = code.startsWith('0x') ? code : code.toUpperCase().trim();
         const now = new Date();
         const timestamp = this.formatTimestamp(now);
-        const todayDateStr = timestamp.substring(0, 12); // Év. Hó. Nap. rész a duplikáció szűréshez
+        const todayDateStr = timestamp.substring(0, 12);
 
-        // Ellenőrzés: ha a mai napon ezzel a kóddal és pontszámmal már történt rögzítés, ne mentse újra
         const alreadyExists = this.pointsData.some(r => 
-            r.code === upperCode && 
+            r.code === recordCode && 
             r.points === points && 
             r.timestamp.startsWith(todayDateStr)
         );
 
         if (alreadyExists || this.hasSavedCurrentSession) {
-            console.log(`ℹ️ Ezt az eredményt (${upperCode} - ${points}) erre a napra már rögzítettük, duplikáció kihagyva.`);
+            console.log(`ℹ️ Ezt az eredményt (${recordCode} - ${points}) erre a napra már rögzítettük, duplikáció kihagyva.`);
             return false;
         }
         
         const newRecord = {
-            code: upperCode,
+            code: recordCode,
             points: points,
             timestamp: timestamp
         };
         
         this.pointsData.push(newRecord);
-        this.hasSavedCurrentSession = true; // Megjelöljük, hogy ebben a sessionben megtörtént a mentés
+        this.hasSavedCurrentSession = true;
         
-        this.saveToLocalStorage(upperCode, points, timestamp);
+        this.saveToLocalStorage(recordCode, points, timestamp);
         this.downloadCSV(now);
         
         if (window.GeryApp) {
             window.GeryApp.state.pointsData = this.pointsData;
         }
         
-        console.log(`💾 Pontok mentve: ${upperCode} → ${points} pont (${timestamp})`);
+        console.log(`💾 Pontok mentve: ${recordCode} → ${points} pont (${timestamp})`);
         return true;
     }
 
@@ -246,7 +269,6 @@ export class PointsManager {
             });
         }
 
-        // Csak akkor adjuk hozzá ideiglenesen a listához, ha még nem mentettük le, és van pontja
         const todayDateStr = this.formatTimestamp(new Date()).substring(0, 12);
         const alreadySavedToday = allRecords.some(r => 
             r.code === currentCode && 
@@ -283,10 +305,11 @@ export class PointsManager {
         } else {
             top10.forEach((record, index) => {
                 const isCurrent = record.code === currentCode && record.points === currentSessionPoints;
+                const displayName = this.formatWalletAddress(record.code); // Rövidített cím itt!
                 html += `
                     <div class="rank-item ${isCurrent ? 'current' : ''}">
                         <span class="rank-pos">#${index + 1}</span>
-                        <span class="rank-code">${record.code}</span>
+                        <span class="rank-code" title="${record.code}">${displayName}</span>
                         <span class="rank-points">${record.points}</span>
                         <span class="rank-time">${record.timestamp}</span>
                     </div>
@@ -303,6 +326,7 @@ export class PointsManager {
             const userIndex = allRecords.findIndex(r => r.code === currentCode && r.points === currentSessionPoints);
             const userRank = userIndex !== -1 ? userIndex + 1 : '-';
             const userRecord = allRecords[userIndex] || { code: currentCode, points: currentSessionPoints, timestamp: this.formatTimestamp(new Date()) };
+            const userDisplayName = this.formatWalletAddress(userRecord.code); // Rövidített cím itt is!
 
             html += `
                 <div class="rank-divider">⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯</div>
@@ -311,7 +335,7 @@ export class PointsManager {
                 </div>
                 <div class="rank-item current">
                     <span class="rank-pos">#${userRank}</span>
-                    <span class="rank-code">${userRecord.code}</span>
+                    <span class="rank-code" title="${userRecord.code}">${userDisplayName}</span>
                     <span class="rank-points">${userRecord.points}</span>
                     <span class="rank-time">${userRecord.timestamp}</span>
                 </div>
