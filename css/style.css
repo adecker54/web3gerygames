@@ -302,7 +302,7 @@ body {
     transform: scale(0.95);
 }
 
-#screen-intro .error-msg {
+/*#screen-intro .error-msg {
     color: #ffffff !important;
     background: #c0392b !important;
     font-size: 1.5rem !important;
@@ -316,7 +316,21 @@ body {
     box-shadow: 0 4px 20px rgba(192, 57, 43, 0.4) !important;
     display: none;
     animation: shake 2s ease;
-}
+}*/
+
+#screen-intro .error-msg {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1) !important; /* Diszkrét, áttetsző fehér háttér */
+    font-size: 1rem !important; /* Igazítva a mező betűméretéhez */
+    font-weight: 400 !important;
+    padding: 8px 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important; /* Vékony, elegáns keret */
+    border-radius: 8px !important;
+    margin-top: 12px !important;
+    min-height: auto !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    display: none;
 
 /* Rázás animáció */
 @keyframes shake {
