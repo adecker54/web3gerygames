@@ -137,22 +137,27 @@ setupIntroScreen() {
 
         const lang = this.modules.language;
 
-        // 1. Beviteli mező engedélyezése az összeg megadásához
+        // 1. Beviteli mező beállítása instrukcióval (placeholder)
         if (codeInput) {
-            codeInput.placeholder = "0.005";
+            codeInput.placeholder = "min. 0.005"; // Itt jellegzetes instrukció van
             codeInput.readOnly = false;
             codeInput.disabled = false;
             codeInput.type = "number";
             codeInput.step = "0.001";
             codeInput.min = "0.005";
             if (!codeInput.value) {
-                codeInput.value = "0.005"; // Alapértelmezett minimum összeg
+                codeInput.value = "0.005"; // Alapértelmezett kiinduló érték
             }
         }
 
         // Gomb alapértelmezett felirata nyelvtámogatással
         if (supportBtn) {
             supportBtn.textContent = lang?.t('connect_wallet') || 'Tárca csatlakozása & Fizetés';
+        }
+
+        // Rejtjük a hibaüzenetet induláskor
+        if (errorMsg) {
+            errorMsg.style.display = 'none';
         }
 
         // Kattintás a Web3 folyamatra
@@ -165,16 +170,16 @@ setupIntroScreen() {
                     errorMsg.style.display = 'none';
                 }
 
-                // Ellenőrizzük a beírt összeget előre
+                // 2. CSAK MOST, KATTINTÁSKOR ELLENŐRZÜK A BEÍRT ÖSSZEGET!
                 const amountStr = codeInput ? codeInput.value : "0.005";
                 const amount = parseFloat(amountStr);
                 
                 if (isNaN(amount) || amount < 0.005) {
                     const minErrText = lang?.t('min_amount_error') || 'A minimális összeg 0.005 tBNB!';
-                    throw new Error(minErrText);
+                    throw new Error(minErrText); // Itt lép működésbe a piros doboz hibaüzenetként, mert valóban hibás értéket adott meg
                 }
 
-                // 1. LÉPÉS: Ha még nincs csatlakoztatva a tárca, csatlakozunk
+                // 3. LÉPÉS: Ha még nincs csatlakoztatva a tárca, csatlakozunk
                 if (!this.modules.wallet.walletAddress) {
                     supportBtn.textContent = lang?.t('connecting_wallet') || 'Tárca csatlakozása...';
                     const address = await this.modules.wallet.connectWallet();
@@ -185,7 +190,7 @@ setupIntroScreen() {
                     supportBtn.textContent = lang?.t('pay_and_enter') || 'Fizetés és Indítás';
                     supportBtn.classList.add('active');
                 } 
-                // 2. LÉPÉS: Ha már csatlakozott, végrehajtjuk a tranzakciót a megadott összeggel
+                // 4. LÉPÉS: Ha már csatlakozott, végrehajtjuk a tranzakciót a megadott összeggel
                 else {
                     supportBtn.textContent = lang?.t('processing_payment') || 'Tranzakció folyamatban...';
                     supportBtn.disabled = true;
@@ -201,6 +206,7 @@ setupIntroScreen() {
                 }
             } catch (err) {
                 console.error(err);
+                // Csak akkor jelenik meg a piros doboz, ha valós hiba (pl. túl alacsony összeg vagy elutasított tárca) történik
                 if (errorMsg) {
                     errorMsg.textContent = err.message || (lang?.t('wallet_error') || 'Hiba történt a művelet során!');
                     errorMsg.style.display = 'block';
