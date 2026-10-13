@@ -309,7 +309,7 @@ body {
     font-weight: 700 !important;
     padding: 12px 20px !important;
     border: 3px solid #a93226 !important;  /* ← vastag piros keret */
-    border-radius: 12px !important;
+/*    border-radius: 12px !important;
     margin-top: 12px !important;
     min-height: 48px !important;
     text-align: center !important;
@@ -331,6 +331,7 @@ body {
     text-align: center !important;
     box-shadow: none !important;
     display: none;
+}
 
 /* Rázás animáció */
 @keyframes shake {
