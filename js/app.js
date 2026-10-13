@@ -170,16 +170,8 @@ setupIntroScreen() {
                     errorMsg.style.display = 'none';
                 }
 
-                // 2. CSAK MOST, KATTINTÁSKOR ELLENŐRZÜK A BEÍRT ÖSSZEGET!
-                const amountStr = codeInput ? codeInput.value : "0.005";
-                const amount = parseFloat(amountStr);
-                
-                if (isNaN(amount) || amount < 0.005) {
-                    const minErrText = lang?.t('min_amount_error') || 'A minimális összeg 0.005 tBNB!';
-                    throw new Error(minErrText); // Itt lép működésbe a piros doboz hibaüzenetként, mert valóban hibás értéket adott meg
-                }
-
-                // 3. LÉPÉS: Ha még nincs csatlakoztatva a tárca, csatlakozunk
+                // 1. LÉPÉS: Ha még nincs csatlakoztatva a tárca, ELŐSZÖR CSATLAKOZUNK.
+                // Itt még NINCS szükség az összeg validálására, csak kössük be a MetaMaskot!
                 if (!this.modules.wallet.walletAddress) {
                     supportBtn.textContent = lang?.t('connecting_wallet') || 'Tárca csatlakozása...';
                     const address = await this.modules.wallet.connectWallet();
@@ -187,26 +179,36 @@ setupIntroScreen() {
                     console.log(`Játékos tárcája csatlakoztatva: ${address}`);
                     this.state.userCode = address; 
                     
+                    // Ha sikeres a csatlakozás, átállítjuk a gombot a fizetésre
                     supportBtn.textContent = lang?.t('pay_and_enter') || 'Fizetés és Indítás';
                     supportBtn.classList.add('active');
+                    return; // Itt megállunk, hagyjuk, hogy a játékos beírja/ellenőrizze az összeget és újra kattintson!
                 } 
-                // 4. LÉPÉS: Ha már csatlakozott, végrehajtjuk a tranzakciót a megadott összeggel
-                else {
-                    supportBtn.textContent = lang?.t('processing_payment') || 'Tranzakció folyamatban...';
-                    supportBtn.disabled = true;
-                    
-                    await this.modules.wallet.payEntranceFee(amountStr);
-                    
-                    this.state.isCodeValid = true;
-                    supportBtn.textContent = lang?.t('success_entering') || 'Siker! Belépés...';
-                    
-                    setTimeout(() => {
-                        this.showScreen('menu');
-                    }, 1000);
+
+                // 2. LÉPÉS: A tárca már csatlakozva van, most kattintott a fizetésre. 
+                // CSAK ITT VÉGEZZÜK EL A VALIDÁCIÓT!
+                const amountStr = codeInput ? codeInput.value : "0.005";
+                const amount = parseFloat(amountStr);
+                
+                if (isNaN(amount) || amount < 0.005) {
+                    const minErrText = lang?.t('min_amount_error') || 'A minimális összeg 0.005 tBNB!';
+                    throw new Error(minErrText); // Csak most dobja ki a piros hibaüzenetet, ha valaki túl kicsi összeget hagyott benne
                 }
+
+                supportBtn.textContent = lang?.t('processing_payment') || 'Tranzakció folyamatban...';
+                supportBtn.disabled = true;
+                
+                await this.modules.wallet.payEntranceFee(amountStr);
+                
+                this.state.isCodeValid = true;
+                supportBtn.textContent = lang?.t('success_entering') || 'Siker! Belépés...';
+                
+                setTimeout(() => {
+                    this.showScreen('menu');
+                }, 1000);
+
             } catch (err) {
                 console.error(err);
-                // Csak akkor jelenik meg a piros doboz, ha valós hiba (pl. túl alacsony összeg vagy elutasított tárca) történik
                 if (errorMsg) {
                     errorMsg.textContent = err.message || (lang?.t('wallet_error') || 'Hiba történt a művelet során!');
                     errorMsg.style.display = 'block';
@@ -217,7 +219,6 @@ setupIntroScreen() {
                 supportBtn.disabled = false;
             }
         });
-
         if (continueBtn) {
             continueBtn.style.display = 'none'; 
         }
