@@ -101,7 +101,7 @@ async payEntranceFee(customAmountStr) {
             ) {
                 // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül
                 const langManager = window.GeryApp?.modules?.language;
-                const errorText = langManager?.t('insufficient_funds_error') || 'A csatlakoztatott tárcában nincs elég fedezet';
+                const errorText = lang?.t("insufficient_funds_error") || 'A csatlakoztatott tárcában nincs elég fedezet';
                 
                 throw new Error(errorText);
             }
