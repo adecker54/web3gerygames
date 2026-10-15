@@ -8,6 +8,7 @@
     "processing_payment": "Tranzakció folyamatban...",
     "success_entering": "Siker! Belépés...",
     "min_amount_error": "A minimális összeg 0.005 tBNB!",
+    "insufficient_funds_error": "A csatlakoztatott tárcában nincs elég fedezet",
     "enter_code": "Add meg a kódszámodat",
     "continue_btn": "Tovább",
     "invalid_code": "Nem jó a kódszám",
