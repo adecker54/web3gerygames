@@ -8,6 +8,7 @@
     "processing_payment": "Processing transaction...",
     "success_entering": "Success! Entering...",
     "min_amount_error": "Minimum amount is 0.005 tBNB!",
+    "insufficient_funds_error": "Insufficient funds in the connected wallet",
     "enter_code": "Enter your code",
     "continue_btn": "Continue",
     "invalid_code": "Invalid code",
