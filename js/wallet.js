@@ -40,7 +40,7 @@ export class WalletManager {
     async switchToBscTestnet() {
         try {
             await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
+                method: "wallet_switchEthereumChain",
                 params: [{ chainId: this.BSC_TESTNET_CHAIN_ID }],
             });
         } catch (switchError) {
@@ -48,13 +48,13 @@ export class WalletManager {
             if (switchError.code === 4902) {
                 try {
                     await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
+                        method: "wallet_addEthereumChain",
                         params: [{
                             chainId: this.BSC_TESTNET_CHAIN_ID,
-                            chainName: 'Binance Smart Chain Testnet',
-                            nativeCurrency: { name: 'tBNB', symbol: 'tBNB', decimals: 18 },
-                            rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
-                            blockExplorerUrls: ['https://testnet.bscscan.com/']
+                            chainName: "Binance Smart Chain Testnet",
+                            nativeCurrency: { name: "tBNB", symbol: "tBNB", decimals: 18 },
+                            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                            blockExplorerUrls: ["https://testnet.bscscan.com/"]
                         }],
                     });
                 } catch (addError) {
@@ -67,7 +67,7 @@ export class WalletManager {
     }
 
     // Díj befizetése: tBNB küldése a kassza tárcába a megadott összeggel
-async payEntranceFee(customAmountStr) {
+    async payEntranceFee(customAmountStr) {
         if (!this.signer) {
             throw new Error("Nincs csatlakoztatott tárca!");
         }
@@ -93,19 +93,19 @@ async payEntranceFee(customAmountStr) {
 
             // Ha fedezethiány van, vagy a gas becslés elhasal a hiányzó egyenleg miatt (CALL_EXCEPTION / missing revert data)
             if (
-                msg.includes('insufficient funds') || 
-                msg.includes('exceeds the balance') || 
-                msg.includes('sender doesn\'t have enough funds') ||
-                msg.includes('missing revert data') ||
-                errorCode === 'CALL_EXCEPTION'
+                msg.includes("insufficient funds") || 
+                msg.includes("exceeds the balance") || 
+                msg.includes("sender doesn\'t have enough funds") ||
+                msg.includes("missing revert data") ||
+                errorCode === "CALL_EXCEPTION"
             ) {
                 // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül
                 const langManager = window.GeryApp?.modules?.language;
                 
                 // Megpróbáljuk lekérni, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
-                let errorText = langManager ? langManager.t('insufficient_funds_error') : '';
-                if (!errorText || errorText === 'insufficient_funds_error') {
-                    errorText = 'A csatlakoztatott tárcában nincs elég fedezet';
+                let errorText = langManager ? langManager.t("insufficient_funds_error") : "";
+                if (!errorText || errorText === "insufficient_funds_error") {
+                    errorText = "A csatlakoztatott tárcában nincs elég fedezet";
                 }                
                 throw new Error(errorText);
             }
