@@ -9,7 +9,7 @@
     "success_entering": "Erfolg! Zugang...",
     "min_amount_error": "Der Mindestbetrag beträgt 0,005 tBNB!",
     "insufficient_funds_error": "In der verbundenen Wallet ist nicht genügend Guthaben vorhanden",
-s    "enter_code": "Geben Sie Ihren Code ein",
+    "enter_code": "Geben Sie Ihren Code ein",
     "continue_btn": "Weiter",
     "invalid_code": "Ungültiger Code",
     "help_title": "Hilfe",
