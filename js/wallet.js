@@ -67,31 +67,45 @@ export class WalletManager {
     }
 
     // Díj befizetése: tBNB küldése a kassza tárcába a megadott összeggel
-    async payEntranceFee(customAmountStr) {
+async payEntranceFee(customAmountStr) {
         if (!this.signer) {
             throw new Error("Nincs csatlakoztatott tárca!");
         }
 
-        // Konvertáljuk a megadott értéket számmá
         const amount = parseFloat(customAmountStr);
         if (isNaN(amount) || amount < 0.005) {
             throw new Error("A minimális összeg 0.005 tBNB!");
         }
 
-        // Átváltás Wei-be ethers-rel
         const feeAmount = ethers.parseEther(amount.toString()); 
 
-        const tx = await this.signer.sendTransaction({
-            to: this.adminAddress,
-            value: feeAmount
-        });
+        try {
+            const tx = await this.signer.sendTransaction({
+                to: this.adminAddress,
+                value: feeAmount
+            });
 
-        console.log(`⏳ Tranzakció elküldve: ${tx.hash}`);
-        
-        // Várjuk meg a blokklánc megerősítést
-        const receipt = await tx.wait();
-        console.log(`✅ Tranzakció megerősítve a blokkon: ${receipt.blockNumber}`);
-        
-        return receipt;
+            const receipt = await tx.wait();
+            return receipt;
+        } catch (err) {
+            const msg = (err.message || "").toLowerCase();
+            const errorCode = (err.code || "").toUpperCase();
+
+            // Ha fedezethiány van, vagy a gas becslés elhasal a hiányzó egyenleg miatt (CALL_EXCEPTION / missing revert data)
+            if (
+                msg.includes('insufficient funds') || 
+                msg.includes('exceeds the balance') || 
+                msg.includes('sender doesn\'t have enough funds') ||
+                msg.includes('missing revert data') ||
+                errorCode === 'CALL_EXCEPTION'
+            ) {
+                // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül
+                const langManager = window.GeryApp?.modules?.language;
+                const errorText = langManager?.t('insufficient_funds_error') || 'A csatlakoztatott tárcában nincs elég fedezet';
+                
+                throw new Error(errorText);
+            }
+            throw err; // Egyéb hiba esetén viszi tovább az eredetit
+        }
     }
 }
