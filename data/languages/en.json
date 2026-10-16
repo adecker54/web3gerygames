@@ -4,6 +4,7 @@
     "menu_title": "Playing to support Gery, the mountain cat",
     "connect_wallet": "Connect Wallet & Pay",
     "connecting_wallet": "Connecting wallet...",
+    "wallet_not_found": "There isn't a Web3 compatible wallet",
     "pay_and_enter": "Pay & Enter",
     "processing_payment": "Processing transaction...",
     "success_entering": "Success! Entering...",
