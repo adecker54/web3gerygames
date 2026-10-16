@@ -10,12 +10,19 @@ export class WalletManager {
         // A te admin/kassza tárcád címe:
         this.adminAddress = "0xddA74737f502dFc2e2e007Ee11448E4794ADcb44";
         this.BSC_TESTNET_CHAIN_ID = "0x61"; // 97
-        const langManager = window.GeryApp?.modules?.language;
     }
 
     // Tárca csatlakoztatása (MetaMask / injected provider)
     async connectWallet() {
+
+        // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
+        const langManager = window.GeryApp?.modules?.language;
+                
         let errorText1 = langManager ? langManager.t("wallet_not_found") : "";
+        if (!errorText1 || errorText1 === "wallet_not_found") {
+            errorText1 = "web3 tárca most nem található";
+        }
+        
         if (!window.ethereum) {
             throw new Error(errorText1);
         }
@@ -101,10 +108,9 @@ export class WalletManager {
                 msg.includes("missing revert data") ||
                 errorCode === "CALL_EXCEPTION"
             ) {
-                // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül
- //               const langManager = window.GeryApp?.modules?.language;
+                // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
+                const langManager = window.GeryApp?.modules?.language;
                 
-                // Megpróbáljuk lekérni, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
                 let errorText = langManager ? langManager.t("insufficient_funds_error") : "";
                 if (!errorText || errorText === "insufficient_funds_error") {
                     errorText = "A csatlakoztatott tárcában nincs elég fedezet";
