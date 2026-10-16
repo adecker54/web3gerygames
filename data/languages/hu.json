@@ -4,6 +4,7 @@
     "menu_title": "Játszva támogatom Gery-t, a hegyimacskát",
     "connect_wallet": "Tárca csatlakozása & Fizetés",
     "connecting_wallet": "Tárca csatlakozása...",
+    "wallet_not_found": "Web3 kompatibilis tárca nem található",
     "pay_and_enter": "Fizetés és Indítás",
     "processing_payment": "Tranzakció folyamatban...",
     "success_entering": "Siker! Belépés...",
