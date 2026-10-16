@@ -14,8 +14,12 @@ export class WalletManager {
 
     // Tárca csatlakoztatása (MetaMask / injected provider)
     async connectWallet() {
+//            supportBtn.textContent = lang?.t('connect_wallet') || 'Tárca csatlakozása & Fizetés';
+        let errorText1 = lang?.t("wallet_not_found") || "nincs Web3 kompatibilis tárca";
+
+        // let errorText1 = langManager ? langManager.t("wallet_not_found") : "";
         if (!window.ethereum) {
-            throw new Error("MetaMask vagy Web3 kompatibilis tárca nem található!");
+            throw new Error(errorText1);
         }
 
         // Ethers v6 használata esetén (feltételezve, hogy window.ethers elérhető CDN-ből, vagy be van importálva)
