@@ -4,6 +4,7 @@
     "menu_title": "Spielend Gery, die Bergkatze, unterstützen",
     "connect_wallet": "Wallet verbinden & Bezahlen",
     "connecting_wallet": "Wallet wird verbunden...",
+    "wallet_not_found": "Keine web3-kompatible Wallet gefunden",
     "pay_and_enter": "Bezahlen und Starten",
     "processing_payment": "Transaktion wird bearbeitet...",
     "success_entering": "Erfolg! Zugang...",
