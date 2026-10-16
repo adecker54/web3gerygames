@@ -14,10 +14,7 @@ export class WalletManager {
 
     // Tárca csatlakoztatása (MetaMask / injected provider)
     async connectWallet() {
-//            supportBtn.textContent = lang?.t('connect_wallet') || 'Tárca csatlakozása & Fizetés';
-        let errorText1 = lang?.t("wallet_not_found") || "nincs Web3 kompatibilis tárca";
-
-        // let errorText1 = langManager ? langManager.t("wallet_not_found") : "";
+        let errorText1 = langManager ? langManager.t("wallet_not_found") : "";
         if (!window.ethereum) {
             throw new Error(errorText1);
         }
