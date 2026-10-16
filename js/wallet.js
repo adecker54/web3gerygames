@@ -66,9 +66,15 @@ export class WalletManager {
                             blockExplorerUrls: ["https://testnet.bscscan.com/"]
                         }],
                     });
-                } catch (addError) {
-                    throw new Error("Nem sikerült a BSC Testnet hálózat hozzáadása a tárcához.");
                 }
+        const langManager = window.GeryApp?.modules?.language;
+                
+        let errorText2 = langManager ? langManager.t("testnet_not_found") : "";
+        if (!errorText2 || errorText2 === "testnet_not_found") {
+            errorText2 = "Nem sikerült a BSC Testnet hálózat hozzáadása a tárcához";
+        }
+            catch (addError) {
+            throw new Error(errorText2);
             } else {
                 throw switchError;
             }
