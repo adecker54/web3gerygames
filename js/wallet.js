@@ -17,10 +17,9 @@ export class WalletManager {
 
         // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
         const langManager = window.GeryApp?.modules?.language;
-                
         let errorText1 = langManager ? langManager.t("wallet_not_found") : "";
         if (!errorText1 || errorText1 === "wallet_not_found") {
-            errorText1 = "web3 tárca most nem található";
+            errorText1 = "Most web3 tárca nem található";
         }
         
         if (!window.ethereum) {
@@ -66,16 +65,17 @@ export class WalletManager {
                             blockExplorerUrls: ["https://testnet.bscscan.com/"]
                         }],
                     });
+                } catch (addError) {
+                    // Nyelvi szöveg lekérése (fallbackkel)
+                    const langManager = window.GeryApp?.modules?.language;
+                    let errorText2 = langManager ? langManager.t("testnet_not_found") : "";
+                    if (!errorText2 || errorText2 === "testnet_not_found") {
+                        errorText2 = "Most nem sikerült a BSC Testnet hálózat hozzáadása a tárcához";
+                    }
+                    throw new Error(errorText2);
                 }
-        const langManager = window.GeryApp?.modules?.language;
-                
-        let errorText2 = langManager ? langManager.t("testnet_not_found") : "";
-        if (!errorText2 || errorText2 === "testnet_not_found") {
-            errorText2 = "Nem sikerült a BSC Testnet hálózat hozzáadása a tárcához";
-        }
-            catch (addError) {
-            throw new Error(errorText2);
             } else {
+                // Más hiba esetén dobjuk tovább az eredeti hibát
                 throw switchError;
             }
         }
@@ -84,12 +84,26 @@ export class WalletManager {
     // Díj befizetése: tBNB küldése a kassza tárcába a megadott összeggel
     async payEntranceFee(customAmountStr) {
         if (!this.signer) {
-            throw new Error("Nincs csatlakoztatott tárca!");
-        }
 
+            // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
+            const langManager = window.GeryApp?.modules?.language;
+            let errorText4 = langManager ? langManager.t("no_wallet_connected") : "";
+            if (!errorText4 || errorText4 === "no_wallet_connected") {
+                errorText4 = "Most nincs csatlakoztatott tárca";
+            }
+        
+            if (!window.ethereum) {
+                throw new Error(errorText4);
+            }
+        }
         const amount = parseFloat(customAmountStr);
         if (isNaN(amount) || amount < 0.005) {
-            throw new Error("A minimális összeg 0.005 tBNB!");
+            const langManager = window.GeryApp?.modules?.language;
+            let errorText5 = langManager ? langManager.t("insufficient_funds_error") : "";
+            if (!errorText5 || errorText === "insufficient_funds_error") {
+                errorText5 = "Most a csatlakoztatott tárcában nincs elég fedezet";
+            }                
+            throw new Error(errorText5);
         }
 
         const feeAmount = ethers.parseEther(amount.toString()); 
@@ -116,7 +130,6 @@ export class WalletManager {
             ) {
                 // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
                 const langManager = window.GeryApp?.modules?.language;
-                
                 let errorText = langManager ? langManager.t("insufficient_funds_error") : "";
                 if (!errorText || errorText === "insufficient_funds_error") {
                     errorText = "A csatlakoztatott tárcában nincs elég fedezet";
