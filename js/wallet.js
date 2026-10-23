@@ -100,7 +100,7 @@ export class WalletManager {
         if (isNaN(amount) || amount < 0.005) {
             const langManager = window.GeryApp?.modules?.language;
             let errorText5 = langManager ? langManager.t("min_amount_error") : "";
-            if (!errorText5 || errorText === "min_amount_error") {
+            if (!errorText5 || errorText5 === "min_amount_error") {
                 errorText5 = "Most a minimális összeg 0.005 tBNB!";
             }                
             throw new Error(errorText5);
@@ -147,7 +147,7 @@ export class WalletManager {
         // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
         const langManager = window.GeryApp?.modules?.language;
         let errorText6 = langManager ? langManager.t("insufficient_funds_error") : "";
-        if (!errorText6 || errorText === "insufficient_funds_error") {
+        if (!errorText6 || errorText6 === "insufficient_funds_error") {
             errorText6 = "Most a csatlakoztatott tárcában nincs elég fedezet";
         }                
         throw new Error(errorText6);
