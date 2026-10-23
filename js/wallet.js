@@ -127,6 +127,7 @@ export class WalletManager {
            msg.includes('cancelled') || 
            msg.includes('canceled')
         )  {
+            const langManager = window.GeryApp?.modules?.language;
             let cancelText = langManager ? langManager.t("transaction_cancelled") : "";
             if (!cancelText || cancelText === "transaction_cancelled") {
                 cancelText = "Most a folyamat megszakadt";
