@@ -99,44 +99,60 @@ export class WalletManager {
         const amount = parseFloat(customAmountStr);
         if (isNaN(amount) || amount < 0.005) {
             const langManager = window.GeryApp?.modules?.language;
-            let errorText5 = langManager ? langManager.t("insufficient_funds_error") : "";
-            if (!errorText5 || errorText === "insufficient_funds_error") {
-                errorText5 = "Most a csatlakoztatott tárcában nincs elég fedezet";
+            let errorText5 = langManager ? langManager.t("min_amount_error") : "";
+            if (!errorText5 || errorText === "min_amount_error") {
+                errorText5 = "Most a minimális összeg 0.005 tBNB!";
             }                
             throw new Error(errorText5);
         }
 
         const feeAmount = ethers.parseEther(amount.toString()); 
 
-        try {
+        try {												
             const tx = await this.signer.sendTransaction({
                 to: this.adminAddress,
                 value: feeAmount
             });
-
             const receipt = await tx.wait();
             return receipt;
+        // Itt történik a fizetési tranzakció (pl. window.ethereum.request...)
         } catch (err) {
-            const msg = (err.message || "").toLowerCase();
-            const errorCode = (err.code || "").toUpperCase();
+        const msg = (err.message || "").toLowerCase();
+        const errorCode = err.code;
 
-            // Ha fedezethiány van, vagy a gas becslés elhasal a hiányzó egyenleg miatt (CALL_EXCEPTION / missing revert data)
-            if (
-                msg.includes("insufficient funds") || 
-                msg.includes("exceeds the balance") || 
-                msg.includes("sender doesn\'t have enough funds") ||
-                msg.includes("missing revert data") ||
-                errorCode === "CALL_EXCEPTION"
-            ) {
-                // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
-                const langManager = window.GeryApp?.modules?.language;
-                let errorText = langManager ? langManager.t("insufficient_funds_error") : "";
-                if (!errorText || errorText === "insufficient_funds_error") {
-                    errorText = "A csatlakoztatott tárcában nincs elég fedezet";
-                }                
-                throw new Error(errorText);
+        // 1. ELESÉS/MEGSZAKÍTÁS KEZELÉSE
+        if (errorCode === 4001 || 
+           msg.includes('user rejected') ||
+           msg.includes('user denied') || 
+           msg.includes('cancelled') || 
+           msg.includes('canceled')
+        )  {
+            let cancelText = langManager ? langManager.t("transaction_cancelled") : "";
+            if (!cancelText || cancelText === "transaction_cancelled") {
+                cancelText = "Most a folyamat megszakadt";
             }
-            throw err; // Egyéb hiba esetén viszi tovább az eredetit
+            throw new Error(cancelText);
+        }
+
+        // 2. INSUFFICIENT FUNDS ÉS TÖBBI HIBA
+
+        // Ha fedezethiány van, vagy a gas becslés elhasal a hiányzó egyenleg miatt (CALL_EXCEPTION / missing revert data)
+        if (
+            msg.includes("insufficient funds") || 
+            msg.includes("exceeds the balance") || 
+            msg.includes("sender doesn\'t have enough funds") ||
+            msg.includes("missing revert data") ||
+            errorCode === "CALL_EXCEPTION"
+        ) {
+        // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
+        const langManager = window.GeryApp?.modules?.language;
+        let errorText6 = langManager ? langManager.t("insufficient_funds_error") : "";
+        if (!errorText6 || errorText === "insufficient_funds_error") {
+            errorText6 = "Most a csatlakoztatott tárcában nincs elég fedezet";
+        }                
+        throw new Error(errorText6);
+        }
+        throw err; // Egyéb hiba esetén viszi tovább az eredetit
         }
     }
 }
