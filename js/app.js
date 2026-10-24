@@ -528,7 +528,7 @@ setupIntroScreen() {
             pointsDisplay.textContent = this.state.sessionPoints || 0;
         }
         if (codeDisplay) {
-            codeDisplay.textContent = this.state.userCode ? `${this.state.userCode.substring(0, 6)}...` : '----';
+            codeDisplay.textContent = this.state.userCode ? `${this.state.userCode.substring(0, 6)}...${this.state.userCode.slice(-5)}` : '----';
         }
         if (dateDisplay) {
             const now = new Date();
