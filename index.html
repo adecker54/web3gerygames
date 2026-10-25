@@ -30,7 +30,7 @@
     <div id="app">
         <!-- A képernyőket a JavaScript fogja dinamikusan betölteni. ez volt a terv,de mégsem történik meg. Következik a javítás. -->
         <!-- ============================================================ -->
-        <!-- NYITÓ KÉPERNYŐ                                                -->
+        <!-- NYITÓ KÉPERNYŐ                                               -->
         <!-- ============================================================ -->
         <div id="screen-intro" class="screen">
             <video class="background-video" muted playsinline>
@@ -49,7 +49,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- JÁTÉK MENÜ                                                    -->
+        <!-- JÁTÉK MENÜ                                                   -->
         <!-- ============================================================ -->
         <div id="screen-menu" class="screen">
             <div class="menu-title" data-i18n="menu_title">Játszva támogatom Geryt, a hegyi macskát</div>
@@ -59,7 +59,7 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- JÁTÉK KÉPERNYŐ                                                -->
+        <!-- JÁTÉK KÉPERNYŐ                                               -->
         <!-- ============================================================ -->
         <div id="screen-game" class="screen">
             <div class="game-container">
@@ -75,73 +75,73 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- BÚCSÚZÓ KÉPERNYŐ                                              -->
+        <!-- BÚCSÚZÓ KÉPERNYŐ                                             -->
         <!-- ============================================================ -->
-<div id="screen-goodbye" class="screen">
-    <img class="goodbye-image" src="assets/images/goodbye.jpg" alt="Viszlát!">
-    <div class="overlay"></div>
-    <div class="content">
-        <h2 data-i18n="goodbye_title">Viszlát!</h2>
-        <p data-i18n="goodbye_points">Összegyűjtött pontjaid:</p>
-        <div class="points-display">0</div>
-        <p data-i18n="goodbye_code">Kódszámod:</p>
-        <div class="code-display">----</div>
-        <p class="date-display"></p>
-        <p style="margin-top:16px;font-size:0.9rem;opacity:0.7;" data-i18n="goodbye_thanks">Köszönjük, hogy játszottál!</p>
-        
-        <!-- TELEGRAM GOMB -->
-        <a href="https://t.me/+Cf-CVVEoRiI4ODY0" target="_blank" id="telegram-btn" style="
-            display: inline-block;
-            margin-top: 20px;
-            padding: 16px 32px;
-            background: linear-gradient(145deg, #0088cc, #006699);
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-decoration: none;
-            border-radius: 50px;
-            box-shadow: 0 4px 20px rgba(0,136,204,0.4);
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: none;
-            cursor: pointer; 
-        "
-        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 30px rgba(0,136,204,0.6)'"
-        onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(0,136,204,0.4)'"
-        data-i18n="telegram_btn">
-            📱 Csatlakozz Gery-hez a Telegramon!
-        </a>
-        <!-- SZAVAZÁS GOMB (a linkes képernyőt nyitja meg) -->
-        <button id="vote-btn" style="
-            display: inline-block;
-            margin-top: 12px;
-            padding: 14px 28px;
-            background: linear-gradient(145deg, #27ae60, #1e8449);
-            color: white;
-            font-size: 1rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(39,174,96,0.4);
-            transition: transform 0.3s, box-shadow 0.3s;
-        "
-        onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 30px rgba(39,174,96,0.6)'"
-        onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(39,174,96,0.4)'"
-        data-i18n="vote_btn">
-            🗳️ Támogasd Gery-t a szavazatoddal is!
-        </button>
+        <div id="screen-goodbye" class="screen">
+            <img class="goodbye-image" src="assets/images/goodbye.jpg" alt="Viszlát!">
+            <div class="overlay"></div>
+            <div class="content">
+            <h2 data-i18n="goodbye_title">Viszlát!</h2>
+            <p data-i18n="goodbye_points">Összegyűjtött pontjaid:</p>
+            <div class="points-display">0</div>
+            <p data-i18n="goodbye_code">Kódszámod:</p>
+            <div class="code-display">----</div>
+            <p class="date-display"></p>
+            <p style="margin-top:16px;font-size:0.9rem;opacity:0.7;" data-i18n="goodbye_thanks">Köszönjük, hogy játszottál!</p>
+            
+            <!-- TELEGRAM GOMB -->
+            <a href="https://t.me/+Cf-CVVEoRiI4ODY0" target="_blank" id="telegram-btn" style="
+                display: inline-block;
+                margin-top: 20px;
+                padding: 16px 32px;
+                background: linear-gradient(145deg, #0088cc, #006699);
+                color: white;
+                font-size: 1.2rem;
+                font-weight: 700;
+                text-decoration: none;
+                border-radius: 50px;
+                box-shadow: 0 4px 20px rgba(0,136,204,0.4);
+                transition: transform 0.3s, box-shadow 0.3s;
+                border: none;
+                cursor: pointer; 
+            "
+            onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 30px rgba(0,136,204,0.6)'"
+            onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(0,136,204,0.4)'"
+            data-i18n="telegram_btn">
+                📱 Csatlakozz Gery-hez a Telegramon!
+            </a>
+            <!-- SZAVAZÁS GOMB (a linkes képernyőt nyitja meg) -->
+                <button id="vote-btn" style="
+                display: inline-block;
+                margin-top: 12px;
+                padding: 14px 28px;
+                background: linear-gradient(145deg, #27ae60, #1e8449);
+                color: white;
+                font-size: 1rem;
+                font-weight: 700;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                box-shadow: 0 4px 20px rgba(39,174,96,0.4);
+                transition: transform 0.3s, box-shadow 0.3s;
+            "
+            onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 30px rgba(39,174,96,0.6)'"
+            onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(39,174,96,0.4)'"
+            data-i18n="vote_btn">
+                🗳️ Támogasd Gery-t a szavazatoddal is!
+            </button>
+        </div>
     </div>
-</div>
 
-<!-- ============================================================ -->
-<!-- LINKEK / INFORMÁCIÓS KÉPERNYŐ                                -->
-<!-- ============================================================ -->
-<div id="screen-links" class="screen">
-    <div class="links-container" style="max-height: 85vh; overflow-y: auto;">
-        <h2 data-i18n="links_title">🌐 Szavazz Gery sikerére!</h2>
-        <p data-i18n="links_intro">Kattints egymás után az alábbi linkekre, majd segíts a szavazatoddal Gery-nek!</p>
-        <p data-i18n="links_sub">Ezzel a célunk, hogy minél többen ismerjék meg Gery-t, a mi hegyimacskánkat. Minden szavazat számít. A szavazógomb általában a jobb oldalon lefelé görgetve érhető el.</p>
-        <div class="links-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"> 
+    <!-- ============================================================ -->
+    <!-- LINKEK / INFORMÁCIÓS KÉPERNYŐ                                -->
+    <!-- ============================================================ -->
+    <div id="screen-links" class="screen">
+        <div class="links-container" style="max-height: 85vh; overflow-y: auto;">
+            <h2 data-i18n="links_title">🌐 Szavazz Gery sikerére!</h2>
+            <p data-i18n="links_intro">Kattints egymás után az alábbi linkekre, majd segíts a szavazatoddal Gery-nek!</p>
+            <p data-i18n="links_sub">Ezzel a célunk, hogy minél többen ismerjék meg Gery-t, a mi hegyimacskánkat. Minden szavazat számít. A szavazógomb általában a jobb oldalon lefelé görgetve érhető el.</p>
+            <div class="links-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"> 
 
             <a href="https://www.freshcoins.io/coins/gery-the-mountain-cat/" target="_blank" rel="noopener noreferrer" class="link-btn">
                 <span class="link-icon">🪙</span>
@@ -184,17 +184,23 @@
                 <span class="link-text">AdSlot</span>
                 <span class="link-status">⬜</span>
             </a>
+            </div>
+
+            <button id="back-from-links-btn" class="back-btn" data-i18n="back_to_game">
+                🔄 Vissza a játékhoz
+            </button>
+
         </div>
-
-        <button id="back-from-links-btn" class="back-btn" data-i18n="back_to_game">
-            🔄 Vissza a játékhoz
-        </button>
-
     </div>
-</div>
 
     <!-- ============================================================ -->
-    <!-- FIX 5 GOMB (minden képernyőn)                                 -->
+    <!-- ADMIN KÉPERNYŐ                                               -->
+    <!-- ============================================================ -->
+    <div id="screen-admin" class="screen" style="display: none; padding: 20px; overflow-y: auto;">
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- FIX 5 GOMB (minden képernyőn)                                -->
     <!-- ============================================================ -->
     <div class="fixed-buttons">
         <button id="btn-help" class="fixed-btn" title="Súgó">
@@ -220,7 +226,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- HANGOK (rejtett audio elemek)                                 -->
+    <!-- HANGOK (rejtett audio elemek)                                -->
     <!-- ============================================================ -->
     <div id="sound-container" style="display:none;">
         <audio id="sound-click" src="assets/sounds/click.mp3" preload="auto"></audio>
