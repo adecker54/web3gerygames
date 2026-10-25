@@ -128,10 +128,10 @@ export class AdminManager {
         this.loadData();
     }
 
-    // Adatok betöltése a mezőkbe
+    // Adatok betöltése a mezőkbe (LocalStorage prioritással a pontoknál)
     async loadData() {
         try {
-            // Kódszámok betöltése
+            // 1. Kódszámok betöltése
             const codesResponse = await fetch('data/codes.txt');
             if (codesResponse.ok) {
                 const codesText = await codesResponse.text();
@@ -140,13 +140,36 @@ export class AdminManager {
                 }
             }
 
-            // Pontok betöltése
-            const pointsResponse = await fetch('data/points.csv');
-            if (pointsResponse.ok) {
-                const pointsText = await pointsResponse.text();
-                if (this.elements.pointsTextarea) {
-                    this.elements.pointsTextarea.value = pointsText;
+            // 2. Pontok betöltése: Először a LocalStorage-ból (gery_all_points) próbáljuk!
+            let pointsText = '';
+            const localPoints = localStorage.getItem('gery_all_points');
+
+            if (localPoints) {
+                try {
+                    const parsedData = JSON.parse(localPoints);
+                    if (Array.isArray(parsedData) && parsedData.length > 0) {
+                        const header = 'code,points,timestamp';
+                        const rows = parsedData.map(r => `${r.code},${r.points},${r.timestamp || ''}`);
+                        pointsText = [header, ...rows].join('\n');
+                        console.log(`📊 Admin: ${parsedData.length} rekord betöltve a LocalStorage-ból.`);
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Hiba a LocalStorage gery_all_points feldolgozásakor:', e);
                 }
+            }
+
+            // Ha a LocalStorage üres volt, próbáljuk letölteni a szerverről a data/points.csv-t
+            if (!pointsText) {
+                const pointsResponse = await fetch('data/points.csv');
+                if (pointsResponse.ok) {
+                    pointsText = await pointsResponse.text();
+                    console.log('📊 Admin: Pontok betöltve a szerverről (data/points.csv).');
+                }
+            }
+
+            // Beállítjuk a szövegdoboz értékét
+            if (this.elements.pointsTextarea) {
+                this.elements.pointsTextarea.value = pointsText;
             }
 
             this.showStatus('✅ Adatok betöltve', 'success');
@@ -156,6 +179,8 @@ export class AdminManager {
             this.showStatus('❌ Hiba az adatok betöltésekor: ' + error.message, 'error');
         }
     }
+
+
 
     // Kódszámok mentése
     async saveCodes() {
