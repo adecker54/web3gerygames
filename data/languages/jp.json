@@ -13,6 +13,7 @@
     "no_wallet_connected": "接続されたウォレットがありません",
     "insufficient_funds_error": "接続されたウォレットに十分な残高がありません",
     "transaction_cancelled": "支払処理が中断されました",
+    "processing_transaction": "取引の処理 ...",
     "enter_code": "コードを入力してください",
     "continue_btn": "続ける",
     "invalid_code": "無効なコード",

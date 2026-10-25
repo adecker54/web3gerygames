@@ -13,6 +13,7 @@
     "no_wallet_connected": "Кошелек не подключен",
     "insufficient_funds_error": "В подключенном кошельке недостаточно средств",    
     "transaction_cancelled": "Процесс оплаты прерван",
+    "processing_transaction": "Обработка транзакции ...",
     "enter_code": "Введите ваш код",
     "continue_btn": "Далее",
     "invalid_code": "Неверный код",

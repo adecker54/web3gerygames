@@ -13,6 +13,7 @@
     "no_wallet_connected": "Nincs csatlakoztatott tárca",
     "insufficient_funds_error": "A csatlakoztatott tárcában nincs elég fedezet",
     "transaction_cancelled": "Megszakadt a fizetés folyamata",
+    "processing_transaction": "Tranzakció feldolgozása ...",
     "enter_code": "Add meg a kódszámodat",
     "continue_btn": "Tovább",
     "invalid_code": "Nem jó a kódszám",

@@ -13,6 +13,7 @@
     "testnet_not_found":"Failed to add the BSC Testnet network to the wallet",
     "no_wallet_connected": "No wallet connected",
     "transaction_cancelled": "The payment process has been cancelled",
+    "processing_transaction": "Processing transaction ...",
     "enter_code": "Enter your code",
     "continue_btn": "Continue",
     "invalid_code": "Invalid code",
