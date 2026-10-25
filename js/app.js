@@ -64,8 +64,12 @@ export class App {
             }
         });
 
-        // Betöltés után megjelenítés
-        await this.showScreen('intro');
+        // Betöltés után megjelenítés és ha az URL-ben benne van az admin=true, akkor az intro helyett az admint indítjuk!
+        if (urlParams.get('admin') === 'true') {
+            await this.showScreen('admin');
+        } else {
+            await this.showScreen('intro');
+        }
         
         this.initialized = true;
         console.log('✅ App inicializálva (Web3 integrációval)');
