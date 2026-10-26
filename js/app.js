@@ -143,14 +143,14 @@ setupIntroScreen() {
 
         // 1. Beviteli mező beállítása instrukcióval (placeholder)
         if (codeInput) {
-            codeInput.placeholder = "min. 0.005"; // Itt jellegzetes instrukció van
+            codeInput.placeholder = "min. 0.001"; // Itt jellegzetes instrukció van
             codeInput.readOnly = false;
             codeInput.disabled = false;
             codeInput.type = "number";
             codeInput.step = "0.001";
-            codeInput.min = "0.005";
+            codeInput.min = "0.001";
             if (!codeInput.value) {
-                codeInput.value = "0.005"; // Alapértelmezett kiinduló érték
+                codeInput.value = "0.001"; // Alapértelmezett kiinduló érték
             }
         }
 
@@ -191,11 +191,11 @@ setupIntroScreen() {
 
                 // 2. LÉPÉS: A tárca már csatlakozva van, most kattintott a fizetésre. 
                 // CSAK ITT VÉGEZZÜK EL A VALIDÁCIÓT!
-                const amountStr = codeInput ? codeInput.value : "0.005";
+                const amountStr = codeInput ? codeInput.value : "0.001";
                 const amount = parseFloat(amountStr);
                 
-                if (isNaN(amount) || amount < 0.005) {
-                    const minErrText = lang?.t('min_amount_error') || 'A minimális összeg 0.005 tBNB!';
+                if (isNaN(amount) || amount < 0.001) {
+                    const minErrText = lang?.t('min_amount_error') || 'A minimális összeg 0.001 tBNB!';
                     throw new Error(minErrText); // Csak most dobja ki a piros hibaüzenetet, ha valaki túl kicsi összeget hagyott benne
                 }
 

@@ -81,32 +81,43 @@ export class WalletManager {
         }
     }
 
-    // Díj befizetése: tBNB küldése a kassza tárcába a megadott összeggel
-    async payEntranceFee(customAmountStr) {
+    // Díj befizetése: tBNB küldése a kassza tárcába a megadott összeggel (gomb letiltással és folyamat jelzéssel)
+    async payEntranceFee(customAmountStr, payButtonElement = null) {
         if (!this.signer) {
-
-            // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
             const langManager = window.GeryApp?.modules?.language;
             let errorText4 = langManager ? langManager.t("no_wallet_connected") : "";
             if (!errorText4 || errorText4 === "no_wallet_connected") {
                 errorText4 = "Most nincs csatlakoztatott tárca";
             }
-        
-            if (!window.ethereum) {
-                throw new Error(errorText4);
-            }
+            throw new Error(errorText4);
         }
+
         const amount = parseFloat(customAmountStr);
-        if (isNaN(amount) || amount < 0.005) {
+        if (isNaN(amount) || amount < 0.001) {
             const langManager = window.GeryApp?.modules?.language;
             let errorText5 = langManager ? langManager.t("min_amount_error") : "";
             if (!errorText5 || errorText5 === "min_amount_error") {
-                errorText5 = "Most a minimális összeg 0.005 tBNB!";
+                errorText5 = "Most a minimális összeg 0.001 tBNB!";
             }                
             throw new Error(errorText5);
         }
 
         const feeAmount = ethers.parseEther(amount.toString()); 
+        
+        // Gomb állapotának mentése és letiltása a várakozás idejére
+        const payButton = payButtonElement || document.getElementById('pay-btn');
+        const originalButtonText = payButton ? payButton.innerHTML : '';
+        const langManager = window.GeryApp?.modules?.language;
+
+        if (payButton) {
+            payButton.disabled = true;
+            let processingText = langManager ? langManager.t("processing_transaction") : "";
+            if (!processingText || processingText === "processing_transaction") {
+                const currentLang = langManager?.currentLang || 'hu';
+                processingText = currentLang === 'en' ? 'Processing transaction...' : 'Tranzakció feldolgozása...';
+            }
+            payButton.innerHTML = processingText;
+        }
 
         try {												
             const tx = await this.signer.sendTransaction({
@@ -115,45 +126,48 @@ export class WalletManager {
             });
             const receipt = await tx.wait();
             return receipt;
-        // Itt történik a fizetési tranzakció (pl. window.ethereum.request...)
+
         } catch (err) {
-        const msg = (err.message || "").toLowerCase();
-        const errorCode = err.code;
+            const msg = (err.message || "").toLowerCase();
+            const errorCode = err.code;
 
-        // 1. ELESÉS/MEGSZAKÍTÁS KEZELÉSE
-        if (errorCode === 4001 || 
-           msg.includes('user rejected') ||
-           msg.includes('user denied') || 
-           msg.includes('cancelled') || 
-           msg.includes('canceled')
-        )  {
-            const langManager = window.GeryApp?.modules?.language;
-            let cancelText = langManager ? langManager.t("transaction_cancelled") : "";
-            if (!cancelText || cancelText === "transaction_cancelled") {
-                cancelText = "Most a folyamat megszakadt";
+            // 1. ELESÉS/MEGSZAKÍTÁS KEZELÉSE
+            if (errorCode === 4001 || 
+               msg.includes('user rejected') ||
+               msg.includes('user denied') || 
+               msg.includes('cancelled') || 
+               msg.includes('canceled')
+            )  {
+                let cancelText = langManager ? langManager.t("transaction_cancelled") : "";
+                if (!cancelText || cancelText === "transaction_cancelled") {
+                    cancelText = "Most a folyamat megszakadt";
+                }
+                throw new Error(cancelText);
             }
-            throw new Error(cancelText);
-        }
 
-        // 2. INSUFFICIENT FUNDS ÉS TÖBBI HIBA
+            // 2. INSUFFICIENT FUNDS ÉS TÖBBI HIBA
+            if (
+                msg.includes("insufficient funds") || 
+                msg.includes("exceeds the balance") || 
+                msg.includes("sender doesn\'t have enough funds") ||
+                msg.includes("missing revert data") ||
+                errorCode === "CALL_EXCEPTION"
+            ) {
+                let errorText6 = langManager ? langManager.t("insufficient_funds_error") : "";
+                if (!errorText6 || errorText6 === "insufficient_funds_error") {
+                    errorText6 = "Most a csatlakoztatott tárcában nincs elég fedezet";
+                }                
+                throw new Error(errorText6);
+            }
+            
+            throw err; // Egyéb hiba esetén viszi tovább az eredetit
 
-        // Ha fedezethiány van, vagy a gas becslés elhasal a hiányzó egyenleg miatt (CALL_EXCEPTION / missing revert data)
-        if (
-            msg.includes("insufficient funds") || 
-            msg.includes("exceeds the balance") || 
-            msg.includes("sender doesn\'t have enough funds") ||
-            msg.includes("missing revert data") ||
-            errorCode === "CALL_EXCEPTION"
-        ) {
-        // Megpróbáljuk lekérni a nyelvi modulból, ha elérhető a GeryApp-on keresztül, de ha az eredmény ugyanaz mint a kulcs (vagy üres), akkor a magyar fallback lép életbe
-        const langManager = window.GeryApp?.modules?.language;
-        let errorText6 = langManager ? langManager.t("insufficient_funds_error") : "";
-        if (!errorText6 || errorText6 === "insufficient_funds_error") {
-            errorText6 = "Most a csatlakoztatott tárcában nincs elég fedezet";
-        }                
-        throw new Error(errorText6);
-        }
-        throw err; // Egyéb hiba esetén viszi tovább az eredetit
+        } finally {
+            // 3. Biztosítjuk, hogy a gomb mindenképpen visszakapja az eredeti állapotát (siker vagy hiba esetén is)
+            if (payButton) {
+                payButton.disabled = false;
+                payButton.innerHTML = originalButtonText;
+            }
         }
     }
 }
