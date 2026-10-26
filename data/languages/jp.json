@@ -18,7 +18,7 @@
     "continue_btn": "続ける",
     "invalid_code": "無効なコード",
     "help_title": "ヘルプ",
-    "help_text": "<span style='color:#000080; strong'>🐾 ゲームへようこそ</span> 🐾<br><br>このWeb3ゲームフレームワークを利用すれば、<span style='color:#F00;font-weight:700;'>私たちの山猫、Gery</span>を支援することができます。<br><br>🎯 <span style='color:#000080; strong'>仕組みは？</span> 🎯<br>1. Web3ウォレットを接続してください！<br>2. <span style='color:#8B6B4F;font-weight:700;'>「山猫ゲリーを支援する」</span> ボタンをクリックしてください！<br>3. 支援額をtBNBで指定してください！選択可能な最小額は0.001 tBNBです。<br>3. <span style='color:#8B6B4F;font-weight:700;'>「支払いと開始」</span>ボタンをクリックしてください！<br>4. ウォレットで支払いを承認してください！<br>5. ブロックチェーン上で支払いが完了すると、すぐにゲームメニューに移動します。<br>6. ゲームを選んで、できるだけ多くのポイントを獲得しましょう！<br><br>⬆（戻る）をクリックすると、ゲームを終了できます。<br>🏆（ランキング）をクリックすると、プレイヤーの中で何位かを確認できます。<br><br> 📌 <em>各ゲームの集計における配点は異なります。</em> 📌<br><br>🐱 <strong>楽しんでください！</strong> 🐱",
+    "help_text": "<span style='color:#000080; font-weight:bold;'>🐾 ゲームへようこそ</span> 🐾<br><br>このWeb3ゲームフレームワークを利用すれば、<span style='color:#F00;font-weight:700;'>私たちの山猫、Gery</span>を支援することができます。<br><br>🎯 <span style='color:#000080; font-weight:bold;'>仕組みは？</span> 🎯<br>1. Web3ウォレットを接続してください！<br>2. <span style='color:#8B6B4F;font-weight:700;'>「山猫ゲリーを支援する」</span> ボタンをクリックしてください！<br>3. 支援額をtBNBで指定してください！選択可能な最小額は0.001 tBNBです。<br>4. <span style='color:#8B6B4F;font-weight:700;'>「支払いと開始」</span>ボタンをクリックしてください！<br>5. ウォレットで支払いを承認してください！<br>6. ブロックチェーン上で支払いが完了すると、すぐにゲームメニューに移動します。<br>7. ゲームを選んで、できるだけ多くのポイントを獲得しましょう！<br><br>⬆（戻る）をクリックすると、ゲームを終了できます。<br>🏆（ランキング）をクリックすると、プレイヤーの中で何位かを確認できます。<br><br> 📌 <em>各ゲームの集計における配点は異なります。</em> 📌<br><br>🐱 <strong>楽しんでください！</strong> 🐱",
     "help_close": "閉じる",
     "language_hu": "ハンガリー語",
     "language_en": "英語",
